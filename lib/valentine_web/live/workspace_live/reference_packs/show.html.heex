@@ -1,0 +1,68 @@
+<.subhead>
+  {hd(@reference_pack).collection_type |> Phoenix.Naming.humanize()} pack: {hd(@reference_pack).collection_name}
+  <:actions>
+    <.button phx-click={JS.patch(~p"/workspaces/#{@workspace_id}/reference_packs")}>
+      {gettext("Back")}
+    </.button>
+    <.button is_primary phx-click="add_references">
+      {gettext("Add selected")}
+      <span :if={length(@selected_references) > 0}>
+        {length(@selected_references)}
+      </span>
+      {gettext("references")}
+    </.button>
+  </:actions>
+</.subhead>
+<.live_component
+  module={ValentineWeb.WorkspaceLive.Components.PaginatedListComponent}
+  id="paginated-list"
+  title={gettext("References")}
+  collection={@reference_pack}
+  selectable={true}
+>
+  <:row :let={item}>
+    <%= case item.collection_type do %>
+      <% :assumption -> %>
+        <.styled_html>
+          {item.data["content"]}
+        </.styled_html>
+        <div :if={item.data["tags"]} class="mt-2">
+          <.button
+            :for={tag <- item.data["tags"]}
+            phx-click="view_control_modal"
+            phx-value-nist_id={tag}
+          >
+            {tag}
+          </.button>
+        </div>
+      <% :mitigation -> %>
+        <.styled_html>
+          {item.data["content"]}
+        </.styled_html>
+        <div :if={item.data["tags"]} class="mt-2">
+          <.button
+            :for={tag <- item.data["tags"]}
+            phx-click="view_control_modal"
+            phx-value-nist_id={tag}
+          >
+            {tag}
+          </.button>
+        </div>
+      <% :threat  -> %>
+        <.styled_html>
+          {Valentine.Composer.Threat.show_statement(cast_keys_to_atoms(item.data))}
+        </.styled_html>
+        <div :if={item.data["tags"]} class="mt-2">
+          <.button
+            :for={tag <- item.data["tags"]}
+            phx-click="view_control_modal"
+            phx-value-nist_id={tag}
+          >
+            {tag}
+          </.button>
+        </div>
+      <% _ -> %>
+        {item.id}
+    <% end %>
+  </:row>
+</.live_component>

@@ -1,0 +1,104 @@
+<.subhead>
+  {gettext("Listing Mitigations")}
+  <:actions>
+    <.button is_primary phx-click={JS.patch(~p"/workspaces/#{@workspace_id}/mitigations/new")}>
+      {gettext("New Mitigation")}
+    </.button>
+  </:actions>
+</.subhead>
+
+<.box id="mitigations" row_id={fn r -> "mitigation-#{r.id}" end}>
+  <:header class="d-flex flex-items-center">
+    {gettext("Filters")}:
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="status-filter"
+      class="mx-1"
+      icon="stack"
+      name={:status}
+      values={Ecto.Enum.values(Valentine.Composer.Mitigation, :status)}
+      filters={@filters}
+    />
+  </:header>
+  <div class="stream-row hidden">
+    <%= if length(@mitigations) == 0 do %>
+      <%= if @filters && @filters != %{} do %>
+        <.blankslate class="color-bg-default">
+          <:octicon name="question-24" />
+          <:action>
+            <.button phx-click="clear_filters">{gettext("Clear all filters")}</.button>
+          </:action>
+          <h3>{gettext("No results found")}</h3>
+          <p>{gettext("You may have filters set that are hiding mitigations")}</p>
+        </.blankslate>
+      <% else %>
+        <.blankslate class="color-bg-default">
+          <:octicon name="check-circle-24" />
+          <:action>
+            <.button
+              phx-click={JS.patch(~p"/workspaces/#{@workspace_id}/mitigations/new")}
+              is_primary
+            >
+              {gettext("Get started")}
+            </.button>
+          </:action>
+          <h3>{gettext("Let's add some mitigations")}</h3>
+          <p>{gettext("Start by clicking the button below and work from there...")}</p>
+        </.blankslate>
+      <% end %>
+    <% end %>
+  </div>
+  <:row :for={mitigation <- @mitigations} class="d-flex flex-items-center flex-justify-between">
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.MitigationComponent}
+      id={"mitigation-#{mitigation.id}"}
+      mitigation={mitigation}
+    />
+  </:row>
+</.box>
+
+<.live_component
+  :if={@live_action in [:new, :edit]}
+  module={ValentineWeb.WorkspaceLive.Mitigation.Components.FormComponent}
+  id={@mitigation.id || :new}
+  action={@live_action}
+  mitigation={@mitigation}
+  current_user={@current_user}
+  patch={~p"/workspaces/#{@workspace_id}/mitigations"}
+  on_cancel={~p"/workspaces/#{@workspace_id}/mitigations"}
+/>
+
+<.live_component
+  :if={@live_action in [:categorize]}
+  module={ValentineWeb.WorkspaceLive.Mitigation.Components.ControlCategorizer}
+  id={@mitigation.id}
+  mitigation={@mitigation}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/mitigations"}
+/>
+
+<.live_component
+  :if={@live_action in [:assumptions]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@mitigation.id}
+  source_entity_type={:mitigation}
+  target_entity_type={:assumptions}
+  entity={@mitigation}
+  linkable_entities={@assumptions}
+  linked_entities={@mitigation.assumptions}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/mitigations"}
+/>
+
+<.live_component
+  :if={@live_action in [:threats]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@mitigation.id}
+  source_entity_type={:mitigation}
+  target_entity_type={:threats}
+  entity={@mitigation}
+  linkable_entities={@threats}
+  linked_entities={@mitigation.threats}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/mitigations"}
+/>

@@ -1,0 +1,72 @@
+<.subhead>
+  {gettext("Workspaces")}
+  <:actions>
+    <.button_group>
+      <.button is_primary phx-click={JS.patch(~p"/workspaces/new")}>
+        {gettext("New Workspace")}
+      </.button>
+      <.action_menu>
+        <:toggle
+          class="rtl-btn btn btn-primary"
+          style="border-top-left-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 6px; border-bottom-right-radius: 6px;"
+        >
+          <.octicon name="triangle-down-16" />
+        </:toggle>
+        <.action_list>
+          <.action_list_item
+            id="import-workspace-btn"
+            phx-click={JS.patch(~p"/workspaces/import")}
+          >
+            {gettext("Import JSON file")}
+          </.action_list_item>
+        </.action_list>
+      </.action_menu>
+    </.button_group>
+  </:actions>
+</.subhead>
+
+<.box id="workspaces" row_id={fn r -> "workspace-#{r.id}" end}>
+  <:header>{gettext("Your workspaces")}</:header>
+  <div class="stream-row hidden">
+    <%= if length(@workspaces) == 0 do %>
+      <.blankslate class="color-bg-default">
+        <:octicon name="tools-24" />
+        <:action>
+          <.button phx-click={JS.patch(~p"/workspaces/new")} is_primary>
+            {gettext("Get started")}
+          </.button>
+        </:action>
+        <h3>{gettext("Let's create a workspace")}</h3>
+        <p>{gettext("Start by clicking the button below and work from there...")}</p>
+      </.blankslate>
+    <% end %>
+  </div>
+  <:row :for={workspace <- @workspaces} class="d-flex flex-items-center flex-justify-between">
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.WorkspaceComponent}
+      id={"workspace-#{workspace.id}"}
+      current_user={@current_user}
+      presence={@presence}
+      workspace={workspace}
+    />
+  </:row>
+</.box>
+
+<.live_component
+  :if={@live_action == :new || (@live_action == :edit && @workspace.owner == @current_user)}
+  module={ValentineWeb.WorkspaceLive.FormComponent}
+  id={@workspace.id || :new}
+  action={@live_action}
+  workspace={@workspace}
+  current_user={@current_user}
+  patch={~p"/workspaces"}
+/>
+
+<.live_component
+  :if={@live_action in [:import]}
+  module={ValentineWeb.WorkspaceLive.ImportComponent}
+  id={:import}
+  workspace={@workspace}
+  current_user={@current_user}
+  patch={~p"/workspaces"}
+/>

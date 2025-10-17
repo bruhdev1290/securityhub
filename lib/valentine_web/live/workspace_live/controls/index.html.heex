@@ -1,0 +1,36 @@
+<.subhead>
+  NIST Controls
+</.subhead>
+<.live_component
+  module={ValentineWeb.WorkspaceLive.Components.PaginatedListComponent}
+  id="paginated-list"
+  title="NIST Controls"
+  collection={@controls}
+>
+  <:filters>
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="nist-family-filter"
+      icon="shield-lock"
+      class=""
+      name={:nist_family}
+      values={@nist_families}
+      filters={@filters}
+    />
+  </:filters>
+  <:row :let={item}>
+    <details>
+      <summary>
+        {item.nist_id}: {item.name}
+      </summary>
+      <div style="box-sizing:border-box; overflow:hidden; word-wrap:anywhere;" class="mt-2">
+        {text_to_html(item.description)}
+      </div>
+      <div class="mt-2">
+        <.button :for={tag <- item.tags}>
+          {tag}
+        </.button>
+      </div>
+    </details>
+  </:row>
+</.live_component>

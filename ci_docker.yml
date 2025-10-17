@@ -1,0 +1,22 @@
+name: Test if the container builds
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - valentine/**
+      - .github/workflows/ci_docker.yml
+
+jobs:
+  continer-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+
+      - name: Build container
+        working-directory: ./valentine
+        run: |
+          docker build -t valentine:latest .

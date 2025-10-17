@@ -1,0 +1,224 @@
+<.subhead>
+  {gettext("Data flow diagram")}
+</.subhead>
+
+<div
+  id="cytoscape-hold"
+  phx-hook="Cytoscape"
+  data-nodes={Jason.encode!(Map.values(@dfd.nodes))}
+  data-edges={Jason.encode!(Map.values(@dfd.edges))}
+  data-selectedtheme={@theme}
+  user={"user-#{System.unique_integer([:positive])}"}
+  phx-window-keydown="handle_keydown"
+>
+  <div class="d-flex mb-2">
+    <div class="d-flex flex-column mr-4">
+      <span class="text-small text-bold mb-1">{gettext("Save")}</span>
+      <%= if @saved do %>
+        <.button is_disabled id="dfd-save-btn">
+          <.octicon name="check-circle-16" />
+          <span>{gettext("Saved")}</span>
+        </.button>
+      <% else %>
+        <.button is_primary id="dfd-save-btn" phx-click="save">
+          <.octicon name="clock-16" />
+          <span>{gettext("Save")}</span>
+        </.button>
+      <% end %>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("History")}</span>
+      <.button_group class="mr-2">
+        <.button
+          is_icon_button
+          aria-label={gettext("Undo")}
+          title={gettext("Undo (Ctrl+Z)")}
+          phx-click="undo"
+          is_disabled={!Valentine.Composer.DataFlowDiagram.can_undo?(@workspace_id)}
+        >
+          <.octicon name="arrow-left-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Redo")}
+          title={gettext("Redo (Ctrl+Y)")}
+          phx-click="redo"
+          is_disabled={!Valentine.Composer.DataFlowDiagram.can_redo?(@workspace_id)}
+        >
+          <.octicon name="arrow-right-24" />
+        </.button>
+      </.button_group>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("Entities")}</span>
+      <.button_group class="mr-2">
+        <.button
+          is_icon_button
+          aria-label={gettext("Add actor")}
+          title={gettext("Add actor")}
+          phx-click="add_node"
+          phx-value-type="actor"
+        >
+          <.octicon name="person-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Add process")}
+          title={gettext("Add process")}
+          phx-click="add_node"
+          phx-value-type="process"
+        >
+          <.octicon name="circle-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Add datastore")}
+          title={gettext("Add datastore")}
+          phx-click="add_node"
+          phx-value-type="datastore"
+        >
+          <.octicon name="stack-24" />
+        </.button>
+      </.button_group>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("Boundaries")}</span>
+      <.button_group class="mr-2">
+        <.button
+          is_icon_button
+          aria-label={gettext("Add boundary")}
+          title={gettext("Add boundary")}
+          phx-click="group_nodes"
+        >
+          <.octicon name="fold-up-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Extend boundary")}
+          title={gettext("Extend boundary")}
+          phx-click="merge_group"
+        >
+          <.octicon name="unfold-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Remove boundary")}
+          title={gettext("Remove boundary")}
+          phx-click="remove_group"
+        >
+          <.octicon name="fold-24" />
+        </.button>
+      </.button_group>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("View options")}</span>
+      <.button_group class="mr-2">
+        <.button
+          is_icon_button
+          aria-label={gettext("Fit view")}
+          title={gettext("Fit view")}
+          phx-click="fit_view"
+        >
+          <.octicon name="project-template-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Zoom in")}
+          title={gettext("Zoom in")}
+          phx-click="zoom_in"
+        >
+          <.octicon name="plus-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Zoom out")}
+          title={gettext("Zoom out")}
+          phx-click="zoom_out"
+        >
+          <.octicon name="horizontal-rule-24" />
+        </.button>
+      </.button_group>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("Destructive actions")}</span>
+      <.button_group class="mr-2">
+        <.button
+          is_icon_button
+          aria-label={gettext("Remove selected elements")}
+          title={gettext("Remove selected elements")}
+          phx-click="remove_elements"
+        >
+          <.octicon name="x-24" />
+        </.button>
+        <.button
+          is_icon_button
+          aria-label={gettext("Clear entire diagram")}
+          title={gettext("Clear entire diagram")}
+          phx-click="clear_dfd"
+          data-confirm={gettext("Are you sure?")}
+          is_danger
+        >
+          <.octicon name="trash-24" />
+        </.button>
+      </.button_group>
+    </div>
+    <div class="d-flex flex-column mr-2">
+      <span class="text-small text-bold mb-1">{gettext("Export")}</span>
+      <.button_group class="mr-2">
+        <a href={"/workspaces/#{@workspace_id}/data_flow/mermaid"} target="_blank">
+          <.button
+            is_icon_button
+            aria-label={gettext("Export to Mermaid.js")}
+            title={gettext("Export to Mermaid.js")}
+          >
+            <.octicon name="download-24" />
+          </.button>
+        </a>
+      </.button_group>
+    </div>
+  </div>
+  <.live_component
+    module={ValentineWeb.WorkspaceLive.Components.DataFlowComponent}
+    id="data_flow_component"
+  />
+</div>
+
+<div
+  :if={Kernel.map_size(Map.merge(@selected_elements["nodes"], @selected_elements["edges"])) == 1}
+  class="mt-2"
+>
+  <.live_component
+    module={ValentineWeb.WorkspaceLive.Components.DataFlowMetadataComponent}
+    id="data_flow_metadata_component"
+    element_id={
+      Map.merge(@selected_elements["nodes"], @selected_elements["edges"]) |> Map.keys() |> hd()
+    }
+    workspace_id={@workspace_id}
+  />
+</div>
+
+<.live_component
+  :if={
+    Kernel.map_size(Map.merge(@selected_elements["nodes"], @selected_elements["edges"])) == 1 &&
+      @show_threat_statement_generator
+  }
+  module={ValentineWeb.WorkspaceLive.DataFlow.Components.ThreatStatementGeneratorComponent}
+  id={:threat_statement_generator_component}
+  workspace_id={@workspace_id}
+  element_id={
+    Map.merge(@selected_elements["nodes"], @selected_elements["edges"]) |> Map.keys() |> hd()
+  }
+/>
+
+<.live_component
+  :if={
+    Kernel.map_size(Map.merge(@selected_elements["nodes"], @selected_elements["edges"])) == 1 &&
+      @show_threat_statement_linker
+  }
+  module={ValentineWeb.WorkspaceLive.DataFlow.Components.ThreatStatementLinkerComponent}
+  id={:threat_statement_linker_component}
+  workspace_id={@workspace_id}
+  element_id={
+    Map.merge(@selected_elements["nodes"], @selected_elements["edges"]) |> Map.keys() |> hd()
+  }
+/>

@@ -1,0 +1,99 @@
+<.subhead>
+  {gettext("Listing Threats")}
+  <:actions>
+    <.link navigate={~p"/workspaces/#{@workspace_id}/threats/new"}>
+      <.button is_primary>{gettext("New Threat Statement")}</.button>
+    </.link>
+  </:actions>
+</.subhead>
+
+<.box id="threat-list">
+  <:header class="d-flex flex-items-center">
+    {gettext("Filters")}:
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="status-filter"
+      class="mx-1"
+      icon="stack"
+      name={:status}
+      values={Ecto.Enum.values(Valentine.Composer.Threat, :status)}
+      filters={@filters}
+    />
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="priority-filter"
+      class="mx-1"
+      icon="list-ordered"
+      name={:priority}
+      values={Ecto.Enum.values(Valentine.Composer.Threat, :priority)}
+      filters={@filters}
+    />
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="stride-filter"
+      class="mx-1"
+      icon="checkbox"
+      name={:stride}
+      values={Ecto.Enum.values(Valentine.Composer.Threat, :stride)}
+      filters={@filters}
+    />
+  </:header>
+  <div class="stream-row hidden">
+    <%= if length(@threats) == 0 do %>
+      <%= if @filters && @filters != %{} do %>
+        <.blankslate class="color-bg-default">
+          <:octicon name="question-24" />
+          <:action>
+            <.button phx-click="clear_filters">{gettext("Clear all filters")}</.button>
+          </:action>
+          <h3>{gettext("No results found")}</h3>
+          <p>{gettext("You may have filters set that are hiding threats")}</p>
+        </.blankslate>
+      <% else %>
+        <.blankslate class="color-bg-default">
+          <:octicon name="squirrel-24" />
+          <:action>
+            <.link navigate={~p"/workspaces/#{@workspace_id}/threats/new"}>
+              <.button is_primary>{gettext("Get started")}</.button>
+            </.link>
+          </:action>
+          <h3>{gettext("Let's write a threat statement!")}</h3>
+          <p>{gettext("Start by clicking the button below and work from there...")}</p>
+        </.blankslate>
+      <% end %>
+    <% end %>
+  </div>
+  <:row :for={threat <- @threats} class="d-flex flex-items-center flex-justify-between">
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.ThreatComponent}
+      id={"threat-statement-#{threat.id}"}
+      threat={threat}
+    />
+  </:row>
+</.box>
+
+<.live_component
+  :if={@live_action in [:assumptions]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@threat.id}
+  source_entity_type={:threat}
+  target_entity_type={:assumptions}
+  entity={@threat}
+  linkable_entities={@assumptions}
+  linked_entities={@threat.assumptions}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/threats"}
+/>
+
+<.live_component
+  :if={@live_action in [:mitigations]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@threat.id}
+  source_entity_type={:threat}
+  target_entity_type={:mitigations}
+  entity={@threat}
+  linkable_entities={@mitigations}
+  linked_entities={@threat.mitigations}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/threats"}
+/>

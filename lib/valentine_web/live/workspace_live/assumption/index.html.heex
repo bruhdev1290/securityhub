@@ -1,0 +1,89 @@
+<.subhead>
+  {gettext("Listing Assumptions")}
+  <:actions>
+    <a href={"/workspaces/#{@workspace_id}/export/assumptions"} target="_blank">
+      <.button is_outline>
+        {gettext("Export reference pack")}
+      </.button>
+    </a>
+    <.button is_primary phx-click={JS.patch(~p"/workspaces/#{@workspace_id}/assumptions/new")}>
+      {gettext("New Assumption")}
+    </.button>
+  </:actions>
+</.subhead>
+
+<.box id="assumptions" row_id={fn r -> "assumption-#{r.id}" end}>
+  <:header class="d-flex flex-items-center">
+    {gettext("Filters")}:
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="status-filter"
+      class="mx-1"
+      icon="stack"
+      name={:status}
+      values={Ecto.Enum.values(Valentine.Composer.Assumption, :status)}
+      filters={@filters}
+    />
+  </:header>
+  <div class="stream-row hidden">
+    <%= if length(@assumptions) == 0 do %>
+      <.blankslate class="color-bg-default">
+        <:octicon name="discussion-closed-24" />
+        <:action>
+          <.button
+            phx-click={JS.patch(~p"/workspaces/#{@workspace_id}/assumptions/new")}
+            is_primary
+          >
+            {gettext("Get started")}
+          </.button>
+        </:action>
+        <h3>{gettext("Let's make some assumptions")}</h3>
+        <p>{gettext("Start by clicking the button below and work from there...")}</p>
+      </.blankslate>
+    <% end %>
+  </div>
+  <:row :for={assumption <- @assumptions} class="d-flex flex-items-center flex-justify-between">
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.AssumptionComponent}
+      id={"assumption-#{assumption.id}"}
+      assumption={assumption}
+    />
+  </:row>
+</.box>
+
+<.live_component
+  :if={@live_action in [:new, :edit]}
+  module={ValentineWeb.WorkspaceLive.Assumption.Components.FormComponent}
+  id={@assumption.id || :new}
+  action={@live_action}
+  assumption={@assumption}
+  current_user={@current_user}
+  patch={~p"/workspaces/#{@workspace_id}/assumptions"}
+  on_cancel={~p"/workspaces/#{@workspace_id}/assumptions"}
+/>
+
+<.live_component
+  :if={@live_action in [:mitigations]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@assumption.id}
+  source_entity_type={:assumption}
+  target_entity_type={:mitigations}
+  entity={@assumption}
+  linkable_entities={@mitigations}
+  linked_entities={@assumption.mitigations}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/assumptions"}
+/>
+
+<.live_component
+  :if={@live_action in [:threats]}
+  module={ValentineWeb.WorkspaceLive.Components.EntityLinkerComponent}
+  id={@assumption.id}
+  source_entity_type={:assumption}
+  target_entity_type={:threats}
+  entity={@assumption}
+  linkable_entities={@threats}
+  linked_entities={@assumption.threats}
+  workspace_id={@workspace_id}
+  patch={~p"/workspaces/#{@workspace_id}/assumptions"}
+/>

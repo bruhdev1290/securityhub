@@ -1,0 +1,65 @@
+name: Build and upload the container to CDS Container Registry
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  REGISTRY: public.ecr.aws/cds-snc
+  IMAGE_NAME: valentine
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure aws credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::283582579564:role/valentine-ecr-push-role-gh
+          role-session-name: ValentineGitHubActions
+          aws-region: "us-east-1"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build docker image
+        run: |
+          make docker
+          docker tag valentine $REGISTRY/$IMAGE_NAME:latest
+          docker tag valentine $REGISTRY/$IMAGE_NAME:$GITHUB_SHA
+
+      - name: Push docker image to AWS ECR
+        run: |
+          docker push $REGISTRY/$IMAGE_NAME:$GITHUB_SHA
+          docker push $REGISTRY/$IMAGE_NAME:latest
+
+  deploy-staging:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure aws credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: arn:aws:iam::975050085632:role/github-restart-cluster-role
+          role-session-name: ValentineGitHubActions
+          aws-region: "ca-central-1"
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster valentine-cluster --service valentine-service --force-new-deployment > /dev/null 2>&1
+
+      - name: Wait for service to stabilize
+        run: |
+          aws ecs wait services-stable --cluster valentine-cluster --services valentine-service > /dev/null 2>&1

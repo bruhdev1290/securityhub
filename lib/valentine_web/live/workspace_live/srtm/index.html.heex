@@ -1,0 +1,190 @@
+<.subhead>
+  {gettext("Security Requirements Traceability Matrix")} {gettext("for")} {@workspace.name}
+  <:actions>
+    <a href={"/workspaces/#{@workspace.id}/srtm/excel"} target="_blank">
+      <.button is_primary>
+        {gettext("Export to Excel")}
+      </.button>
+    </a>
+  </:actions>
+</.subhead>
+
+<.box id="control-list">
+  <:header class="d-flex flex-items-center">
+    {gettext("Filters")}:
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="profile-filter"
+      class="mx-1"
+      icon="cloud"
+      name={:profile}
+      values={["CCCS Low Profile for Cloud", "CCCS Medium Profile for Cloud"]}
+      filters={@filters}
+    />
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="type-filter"
+      class="mx-1"
+      icon="archive"
+      name={:type}
+      values={[
+        "CSP Full Stack",
+        "CSP Stacked PaaS",
+        "CSP Stacked SaaS",
+        "Client IaaS / PaaS",
+        "Client SaaS"
+      ]}
+      filters={@filters}
+    />
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="class-filter"
+      class="mx-1"
+      icon="screen-normal"
+      name={:class}
+      values={[
+        "Management",
+        "Operational",
+        "Technical"
+      ]}
+      filters={@filters}
+    />
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.FilterComponent}
+      id="nist-family-filter"
+      class="mx-1"
+      icon="shield-lock"
+      name={:nist_family}
+      values={@nist_families}
+      filters={@filters}
+    />
+  </:header>
+
+  <div class="clearfix">
+    <div class="col-12 col-md-4 float-left py-4 pl-4">
+      <div class="p-4 border rounded-2">
+        <div class="f4">{gettext("Not allocated")}</div>
+        <div class="clearfix">
+          <div class="float-left">
+            <div class="f2 text-bold">{map_size(@controls[:not_allocated])}</div>
+          </div>
+          <div class="float-right">
+            <div class="mt-2">{calculate_percentage(@controls, :not_allocated)}%</div>
+          </div>
+          <div class="col-12 float-left">
+            <.progress is_inline style="width: 100%;">
+              <:item
+                width={calculate_percentage(@controls, :not_allocated)}
+                state={scope_progress_class(:not_allocated)}
+              >
+              </:item>
+            </.progress>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-8 float-left p-4">
+      <div class="clearfix">
+        <div class="p-4 border border-right-0 rounded-left-2 col-12 col-md-6 float-left">
+          <div class="f4">{gettext("Out of scope")}</div>
+          <div class="float-left">
+            <div class="f2 text-bold">{map_size(@controls[:out_of_scope])}</div>
+          </div>
+          <div class="float-right">
+            <div class="mt-2">{calculate_percentage(@controls, :out_of_scope)}%</div>
+          </div>
+          <div class="col-12 float-left">
+            <.progress is_inline style="width: 100%;">
+              <:item
+                width={calculate_percentage(@controls, :out_of_scope)}
+                state={scope_progress_class(:out_of_scope)}
+              >
+              </:item>
+            </.progress>
+          </div>
+        </div>
+        <div class="p-4 border rounded-right-2 col-12 col-md-6 float-left">
+          <div class="f4">{gettext("In scope")}</div>
+          <div class="float-left">
+            <div class="f2 text-bold">{map_size(@controls[:in_scope])}</div>
+          </div>
+          <div class="float-right">
+            <div class="mt-2">{calculate_percentage(@controls, :in_scope)}%</div>
+          </div>
+          <div class="col-12 float-left">
+            <.progress is_inline style="width: 100%;">
+              <:item
+                width={calculate_percentage(@controls, :in_scope)}
+                state={scope_progress_class(:in_scope)}
+              >
+              </:item>
+            </.progress>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clearfix m-2">
+    <.live_component
+      module={ValentineWeb.WorkspaceLive.Components.TabNavComponent}
+      id="tabs-component-srtm"
+      tabs={[
+        %{label: gettext("Not allocated"), id: "not_allocated"},
+        %{label: gettext("Out of scope"), id: "out_of_scope"},
+        %{label: gettext("In scope"), id: "in_scope"}
+      ]}
+    >
+      <:tab_content :let={tab}>
+        <%= for {_nist_id, items} <- Enum.sort(@controls[String.to_existing_atom(tab)]) do %>
+          <%= case {String.to_existing_atom(tab), items} do %>
+            <% {:not_allocated, [control]} -> %>
+              <div class="p-3">
+                <div class="">{control.nist_id}</div>
+                <div class="">{control.name}</div>
+                <details>
+                  <summary class="mt-2">
+                    {gettext("More information")}
+                  </summary>
+                  <div class="mt-1 pl-4">
+                    {control.description}
+                  </div>
+                </details>
+              </div>
+            <% {_, [{control, related_items}]} -> %>
+              <div class="p-3">
+                <div class="">{control.nist_id}</div>
+                <div class="">{control.name}</div>
+                <%= for item <- related_items do %>
+                  <div class="mt-2">
+                    <details>
+                      <summary class="">
+                        <%= case String.to_existing_atom(tab) do %>
+                          <% :out_of_scope -> %>
+                            {gettext("Covered by assumption")}:
+                          <% :in_scope -> %>
+                            <%= case item do %>
+                              <% _ = %Valentine.Composer.Threat{} -> %>
+                                {gettext("Threatened by")}:
+                              <% _ -> %>
+                                {gettext("Mitigated by")}:
+                            <% end %>
+                        <% end %>
+                        {item_content(item)}
+                      </summary>
+                      <%= if item.comments do %>
+                        <div class="mt-1 pl-4">
+                          <ValentineWeb.WorkspaceLive.Components.MarkdownComponent.render text={
+                            item.comments
+                          } />
+                        </div>
+                      <% end %>
+                    </details>
+                  </div>
+                <% end %>
+              </div>
+          <% end %>
+        <% end %>
+      </:tab_content>
+    </.live_component>
+  </div>
+</.box>

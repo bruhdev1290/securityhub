@@ -1,0 +1,395 @@
+<.subhead>
+  <%= if @threat.id do %>
+    {gettext("Edit Threat Statement")}
+  <% else %>
+    {gettext("New Threat Statement")}
+  <% end %>
+  <:actions>
+    <.link navigate={~p"/workspaces/#{@workspace_id}/threats"}>
+      <.button>{gettext("Back")}</.button>
+    </.link>
+    <.button phx-click="save" is_primary>{gettext("Save")}</.button>
+  </:actions>
+</.subhead>
+
+<div class="clearfix">
+  <div class="float-left col-8">
+    <.box class="p-4">
+      <h3>{gettext("Statement")}</h3>
+      <p class="my-4">
+        {gettext("Start by clicking ANY field you like and work from there...")}
+      </p>
+
+      <div class="clearfix">
+        <div class="float-left p-1 mt-1">
+          {ValentineWeb.WorkspaceLive.Threat.Components.ThreatHelpers.a_or_an(
+            @changes[:threat_source],
+            true
+          )}
+        </div>
+
+        <.live_component
+          module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+          id="source-field"
+          field={:threat_source}
+          type={:text}
+          placeholder="threat source"
+          value={@changes[:threat_source]}
+        />
+
+        <.live_component
+          module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+          id="prerequisites-field"
+          field={:prerequisites}
+          type={:text}
+          placeholder="prerequisites"
+          value={@changes[:prerequisites]}
+        />
+
+        <div class="float-left p-1 mt-1">can</div>
+
+        <.live_component
+          module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+          id="action-field"
+          field={:threat_action}
+          type={:text}
+          placeholder="threat action"
+          value={@changes[:threat_action]}
+        />
+
+        <div class="float-left p-1 mt-1">which leads to</div>
+
+        <.live_component
+          module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+          id="impact-field"
+          field={:threat_impact}
+          type={:text}
+          placeholder="threat impact"
+          value={@changes[:threat_impact]}
+        />
+
+        <div class="float-left p-1 mt-1">
+          ,
+        </div>
+
+        <%= if @toggle_goals || (@changes[:impacted_goal] && @changes[:impacted_goal] != []) do %>
+          <div class="float-left p-1 mt-1">
+            resulting in reduced
+          </div>
+          <.live_component
+            module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+            id="goal-field"
+            field={:impacted_goal}
+            type={:array}
+            placeholder="impacted goal"
+            value={@changes[:impacted_goal]}
+          />
+        <% end %>
+        <div class="float-left mt-1">
+          <.button is_icon_button phx-click="toggle_goals">
+            <%= if @toggle_goals || (@changes[:impacted_goal] && @changes[:impacted_goal] != []) do %>
+              <.octicon name="no-entry-16" />
+            <% else %>
+              <.octicon name="plus-circle-16" />
+            <% end %>
+          </.button>
+        </div>
+
+        <div class="float-left p-1 mt-1">negatively impacting</div>
+
+        <.live_component
+          module={ValentineWeb.WorkspaceLive.Threat.Components.ThreatFieldComponent}
+          id="asset-field"
+          field={:impacted_assets}
+          type={:array}
+          placeholder="impacted assets"
+          value={@changes[:impacted_assets]}
+        />
+        <div class="float-left p-1 mt-1">.</div>
+      </div>
+
+      <%= if @errors do %>
+        <.alert state="error" class="mt-2">
+          <p><.octicon name="stop-16" /> Error</p>
+          <ul class="ml-6">
+            <%= for {field, error} <- @errors do %>
+              <li>{"#{Phoenix.Naming.humanize(field)} #{elem(error, 0)}"}</li>
+            <% end %>
+          </ul>
+        </.alert>
+      <% end %>
+    </.box>
+
+    <%= if !is_nil(@active_type) do %>
+      <.box class="p-4 mt-2">
+        <%= case @active_type do %>
+          <% "text"-> %>
+            <.live_component
+              id="active-field"
+              module={ValentineWeb.WorkspaceLive.Threat.Components.TextInputComponent}
+              active_field={@active_field}
+              current_value={@changes[@active_field]}
+              context={@context}
+              dfd_examples={get_dfd_data(@workspace_id, @active_field)}
+            />
+          <% "array" -> %>
+            <.live_component
+              id="active-field"
+              module={ValentineWeb.WorkspaceLive.Threat.Components.ArrayInputComponent}
+              active_field={@active_field}
+              current_value={@changes[@active_field] || []}
+              context={@context}
+              dfd_examples={get_dfd_data(@workspace_id, @active_field)}
+            />
+          <% _ -> %>
+        <% end %>
+      </.box>
+    <% end %>
+
+    <.box class="p-4 mt-2">
+      <h3>{gettext("Comments")}</h3>
+      <.live_component
+        module={ValentineWeb.WorkspaceLive.Components.TabNavComponent}
+        id={"tabs-component-threat-#{@threat.id}"}
+        tabs={[
+          %{label: gettext("Write"), id: "tab1"},
+          %{label: gettext("Preview"), id: "tab2"}
+        ]}
+      >
+        <:tab_content :let={tab}>
+          <%= case tab do %>
+            <% "tab1" -> %>
+              <form phx-change="update_field">
+                <.textarea
+                  name="comments"
+                  class="mt-2"
+                  placeholder={gettext("Add a comment...")}
+                  input_id="comments"
+                  is_full_width
+                  rows="7"
+                  value={@changes[:comments]}
+                  caption={gettext("Markdown is supported")}
+                />
+              </form>
+            <% "tab2" -> %>
+              <div class="markdown-body">
+                <ValentineWeb.WorkspaceLive.Components.MarkdownComponent.render text={
+                  @changes[:comments]
+                } />
+              </div>
+          <% end %>
+        </:tab_content>
+      </.live_component>
+    </.box>
+
+    <.live_component
+      :if={@threat.id}
+      module={ValentineWeb.WorkspaceLive.Components.DrawerComponent}
+      id="assumption-dropdown"
+      title={gettext("Linked Assumptions")}
+      count={@threat.assumptions |> Enum.count()}
+    >
+      <:button>
+        <.button
+          is_primary
+          aria-label="New assumption"
+          phx-click={
+            JS.patch(~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}/assumption")
+          }
+          id={"linked-threat-assumptions-#{@threat.id}"}
+        >
+          {gettext("New assumption")}
+        </.button>
+      </:button>
+      <:content>
+        <div class="mt-2">
+          <.live_component
+            module={ValentineWeb.WorkspaceLive.Components.DropdownSelectComponent}
+            id="assumptions-dropdown"
+            name="assumptions"
+            items={
+              (@assumptions -- @threat.assumptions)
+              |> Enum.map(fn a -> %{id: a.id, name: a.content} end)
+            }
+          />
+        </div>
+        <div class="mt-2">
+          <%= for assumption <- @threat.assumptions || [] do %>
+            <.button phx-click="remove_assumption" phx-value-id={assumption.id} class="tag-button">
+              <span>{assumption.content}</span>
+              <.octicon name="x-16" />
+            </.button>
+          <% end %>
+        </div>
+      </:content>
+    </.live_component>
+
+    <.live_component
+      :if={@threat.id}
+      module={ValentineWeb.WorkspaceLive.Components.DrawerComponent}
+      id="mitigation-dropdown"
+      title={gettext("Linked Mitigations")}
+      count={@threat.mitigations |> Enum.count()}
+    >
+      <:button>
+        <.button
+          is_primary
+          aria-label="New mitigation"
+          phx-click={
+            JS.patch(~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}/mitigation")
+          }
+          id={"linked-threat-mitigations-#{@threat.id}"}
+        >
+          {gettext("New mitigation")}
+        </.button>
+      </:button>
+      <:content>
+        <div class="mt-2">
+          <.live_component
+            module={ValentineWeb.WorkspaceLive.Components.DropdownSelectComponent}
+            id="mitigations-dropdown"
+            name="mitigations"
+            items={
+              (@mitigations -- @threat.mitigations)
+              |> Enum.map(fn a -> %{id: a.id, name: a.content} end)
+            }
+          />
+        </div>
+        <div class="mt-2">
+          <%= for mitigation <- @threat.mitigations || [] do %>
+            <.button phx-click="remove_mitigation" phx-value-id={mitigation.id} class="tag-button">
+              <span>{mitigation.content}</span>
+              <.octicon name="x-16" />
+            </.button>
+          <% end %>
+        </div>
+      </:content>
+    </.live_component>
+  </div>
+  <div class="float-left col-3 pl-4">
+    <.action_list_section_divider>
+      <:title><.octicon name="stack-16" />{gettext("Status")}</:title>
+    </.action_list_section_divider>
+    <form phx-change="update_field">
+      <.select
+        is_full_width
+        name="status"
+        class="mt-2"
+        options={
+          Ecto.Enum.values(Valentine.Composer.Threat, :status)
+          |> Enum.map(&{Phoenix.Naming.humanize(&1), &1})
+        }
+        input_id="status"
+        selected={@changes[:status]}
+      />
+    </form>
+    <.action_list_section_divider />
+    <.action_list_section_divider>
+      <:title><.octicon name="list-ordered-16" />{gettext("Priority")}</:title>
+    </.action_list_section_divider>
+    <form phx-change="update_field">
+      <.select
+        is_full_width
+        name="priority"
+        class="mt-2"
+        options={["", "Low", "Medium", "High"]}
+        input_id="priority"
+        selected={Phoenix.Naming.humanize(@changes[:priority])}
+      />
+    </form>
+    <.action_list_section_divider />
+    <.action_list_section_divider>
+      <:title>STRIDE</:title>
+    </.action_list_section_divider>
+    <form phx-change="update_field">
+      <%= for value <- [
+            :spoofing,
+            :tampering,
+            :repudiation,
+            :information_disclosure,
+            :denial_of_service,
+            :elevation_of_privilege
+          ] do %>
+        <div>
+          <.checkbox
+            name="stride[]"
+            checked_value={value}
+            checked={@changes[:stride] && value in @changes[:stride]}
+          >
+            <:label style="font-weight: normal">{Phoenix.Naming.humanize(value)}</:label>
+          </.checkbox>
+        </div>
+      <% end %>
+    </form>
+    <.action_list_section_divider />
+    <.action_list_section_divider>
+      <:title>{gettext("Inputs for mitigation")}</:title>
+    </.action_list_section_divider>
+    <ul style="list-style:none">
+      <li
+        :for={
+          {key, input} <- [
+            {:threat_source, "Threat source"},
+            {:prerequisites, "Prerequisites"},
+            {:threat_action, "Threat action"}
+          ]
+        }
+        class="mb-2"
+      >
+        <%= if !is_nil(@changes[key]) && @changes[key] != "" do %>
+          <.octicon name="check-circle-16" class="Label--success" />
+          <span class="ml-1">{input}</span>
+        <% else %>
+          <.octicon name="x-circle-16" class="Label--danger" />
+          <span class="ml-1">{input}</span>
+        <% end %>
+      </li>
+    </ul>
+    <.action_list_section_divider />
+    <.action_list_section_divider>
+      <:title>{gettext("Inputs for prioritization")}</:title>
+    </.action_list_section_divider>
+    <ul style="list-style:none">
+      <li
+        :for={
+          {key, input} <- [
+            {:threat_impact, "Threat impact"},
+            {:impacted_goal, "Impacted goal"},
+            {:impacted_assets, "Impacted assets"}
+          ]
+        }
+        class="mb-2"
+      >
+        <%= if !is_nil(@changes[key]) && @changes[key] != "" do %>
+          <.octicon name="check-circle-16" class="Label--success" />
+          <span class="ml-1">{input}</span>
+        <% else %>
+          <.octicon name="x-circle-16" class="Label--danger" />
+          <span class="ml-1">{input}</span>
+        <% end %>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<.live_component
+  :if={@live_action in [:new_assumption]}
+  module={ValentineWeb.WorkspaceLive.Assumption.Components.FormComponent}
+  id={:new_assumption}
+  action={:new}
+  assumption={@assumption}
+  current_user={@current_user}
+  patch={~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}"}
+  on_cancel={~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}"}
+/>
+
+<.live_component
+  :if={@live_action in [:new_mitigation]}
+  module={ValentineWeb.WorkspaceLive.Mitigation.Components.FormComponent}
+  id={:new_mitigation}
+  action={:new}
+  mitigation={@mitigation}
+  current_user={@current_user}
+  patch={~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}"}
+  on_cancel={~p"/workspaces/#{@threat.workspace_id}/threats/#{@threat.id}"}
+/>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  class="[scrollbar-gutter:stable]"
+  data-theme={if @theme, do: @theme, else: "light"}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Ctext%20x='0'%20y='14'%3E🍁%3C/text%3E%3C/svg%3E"
+      type="image/svg+xml"
+    />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title>
+      {assigns[:page_title] || "Navigator"}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/primer_live/primer-live.min.css"} />
+    <script
+      defer
+      phx-track-static
+      type="text/javascript"
+      src={~p"/primer_live/primer-live.min.js"}
+    >
+    </script>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+  </head>
+  <body class="primer-live">
+    {@inner_content}
+    <div id="session" phx-hook="Session"></div>
+  </body>
+</html>
