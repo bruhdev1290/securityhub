@@ -942,11 +942,7 @@ When implementing features from this roadmap:
 
 ---
 
-## 📞 Contact
 
-For questions about this roadmap or to discuss implementation priorities:
-- Email: max.neuvians@cds-snc.ca
-- GitHub Issues: https://github.com/canada-ca/navigator/issues
 
 ---
 
