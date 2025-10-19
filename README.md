@@ -27,8 +27,11 @@ If you prefer images over text you can look at the [gallery](screenshots/GALLERY
 ## 🚀 Project Roadmap
 
 This project has an ambitious roadmap for future enhancements. See:
+- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Complete guide to all redesign documentation
 - **[NEXT_STEPS.md](NEXT_STEPS.md)** - Comprehensive feature roadmap organized into 12 phases
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[ROADMAP_VISUAL.md](ROADMAP_VISUAL.md)** - Visual diagrams and timeline
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Code examples and patterns
 
 We welcome contributions! Check out the roadmap to see what features are planned and how you can help.
 
@@ -152,8 +155,11 @@ Si vous préférez les images au lieu des textes, vous pouvez consulter la [gale
 ## 🚀 Feuille de route du projet
 
 Ce projet a une feuille de route ambitieuse pour les améliorations futures. Voir :
+- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Guide complet de toute la documentation de refonte
 - **[NEXT_STEPS.md](NEXT_STEPS.md)** - Feuille de route complète des fonctionnalités organisée en 12 phases
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Lignes directrices pour contribuer au projet
+- **[ROADMAP_VISUAL.md](ROADMAP_VISUAL.md)** - Diagrammes visuels et chronologie
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Exemples de code et modèles
 
 Nous accueillons les contributions ! Consultez la feuille de route pour voir les fonctionnalités prévues et comment vous pouvez aider.
 
