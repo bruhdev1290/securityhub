@@ -24,6 +24,17 @@ IMPORTANT: This project is undergoing active development and may experience brea
 
 If you prefer images over text you can look at the [gallery](screenshots/GALLERY.md).
 
+## 🚀 Project Roadmap
+
+This project has an ambitious roadmap for future enhancements. See:
+- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Complete guide to all redesign documentation
+- **[NEXT_STEPS.md](NEXT_STEPS.md)** - Comprehensive feature roadmap organized into 12 phases
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[ROADMAP_VISUAL.md](ROADMAP_VISUAL.md)** - Visual diagrams and timeline
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Code examples and patterns
+
+We welcome contributions! Check out the roadmap to see what features are planned and how you can help.
+
 ## Rationale
 
 Navigator offers an alternative to the compliance-driven security approach commonly practiced in large organizations. In teams following agile development practices, compliance-driven security often creates a bottleneck: controls must either be determined before development begins or after it concludes. This paradigm positions security as an obstacle to development rather than a collaborative partner in the process.
@@ -140,6 +151,17 @@ IMPORTANT : Ce projet est en cours de développement et peut subir des modificat
 5. Utilisation de dossiers de référence partageables pour aider à établir des hypothèses communes, des menaces et des mesures d’atténuation au sein des équipes d’une organisation.
 
 Si vous préférez les images au lieu des textes, vous pouvez consulter la [galerie].
+
+## 🚀 Feuille de route du projet
+
+Ce projet a une feuille de route ambitieuse pour les améliorations futures. Voir :
+- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Guide complet de toute la documentation de refonte
+- **[NEXT_STEPS.md](NEXT_STEPS.md)** - Feuille de route complète des fonctionnalités organisée en 12 phases
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Lignes directrices pour contribuer au projet
+- **[ROADMAP_VISUAL.md](ROADMAP_VISUAL.md)** - Diagrammes visuels et chronologie
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Exemples de code et modèles
+
+Nous accueillons les contributions ! Consultez la feuille de route pour voir les fonctionnalités prévues et comment vous pouvez aider.
 
 ## Justification
 
